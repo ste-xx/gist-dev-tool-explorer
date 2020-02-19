@@ -1,0 +1,25 @@
+<html>
+<head>
+    <style>
+        html {
+            --background-color: white;
+            --text-color: rgb(53, 54, 58);
+        }
+
+        html[data-theme='dark'] {
+            --background-color: rgb(53, 54, 58);
+            --text-color: white;
+        }
+
+        body {
+            background-color: var(--background-color);
+            background-color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+</div>
+</body>
+<script src="dist/main.js"></script>
+</html>
