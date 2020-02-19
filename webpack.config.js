@@ -3,11 +3,6 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
-  resolve: {
-    alias: {
-      GITHUB_PERSONAL_ACCESS_TOKEN:  path.resolve(__dirname, './.githubPersonalAccessToken.js'),
-    }
-  },
   module: {
     rules: [
       {

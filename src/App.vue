@@ -1,6 +1,16 @@
 <template>
     <div id="app" class="wrapper">
-        <div class="box header">Gist Explorer</div>
+        <div class="box header">
+            Gist Explorer
+            your personal access token:
+            <input v-model="token" placeholder="github access token">
+            <button @click="saveToken">
+                save token
+            </button>
+            <button @click="load">
+                load
+            </button>
+        </div>
         <div class="box sidebar">
             <button v-for="gist in gists" @click="show(gist)">
                 {{ gist.name }}
@@ -21,24 +31,35 @@
   export default {
     data() {
       return {
+        token: '',
         sourceCode: 'Hello World',
         apolloClient: null,
         gists: [],
       }
     },
     async mounted() {
-      this.apolloClient = await createApolloClient();
-      const {data} = await this.apolloClient.query({query});
-      this.gists = data.viewer.gists.edges.map(({node}) => ({
-        id: node.name,
-        name: node.files[0].name,
-        text: node.files[0].text
-      }));
-      console.warn(this.gists);
+      this.token = localStorage.getItem("token") || '';
+      this.apolloClient = await createApolloClient({
+        getToken: () => this.token
+      });
+      if(this.token !== ''){
+        return this.load();
+      }
     },
     methods: {
       show(gist) {
         this.sourceCode = gist.text;
+      },
+      async load(){
+        const {data} = await this.apolloClient.query({query});
+        this.gists = data.viewer.gists.edges.map(({node}) => ({
+          id: node.name,
+          name: node.files[0].name,
+          text: node.files[0].text
+        }));
+      },
+      saveToken() {
+        localStorage.setItem("token", this.token);
       }
     },
   }
