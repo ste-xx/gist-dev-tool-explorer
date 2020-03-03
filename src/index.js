@@ -1,9 +1,9 @@
-import ApolloClient from "apollo-boost";
-import gql from "graphql-tag";
 import Vue from 'vue';
+import vuetify from './plugins/vuetify.ts'
 import App from './App.vue';
 
 const app = new Vue({
   el: '#app',
-  render: h => h(App)
-});
+  render: h => h(App),
+  vuetify,
+}).$mount('#app');

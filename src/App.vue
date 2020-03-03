@@ -1,27 +1,41 @@
 <template>
-    <div id="app" class="wrapper">
-        <div class="box header">
-            Gist Explorer
-            your personal access token:
-            <input v-model="token" placeholder="github access token">
-            <button @click="saveToken">
-                save token
-            </button>
-            <button @click="load">
-                load
-            </button>
-        </div>
-        <div class="box sidebar">
-            <button v-for="gist in gists" @click="show(gist)">
-                {{ gist.name }}
-            </button>
-        </div>
-        <div class="box content">
-            <div>
-                {{ sourceCode}}
-            </div>
-        </div>
-    </div>
+    <v-app>
+        <v-app-bar app clipped-left>
+            <v-app-bar-nav-icon @click="drawer = !drawer"/>
+            <span class="title ml-3 mr-5">Gist Explorer</span>
+            <v-spacer/>
+            <v-text-field
+                    v-model="token"
+                    solo-inverted
+                    flat
+                    hide-details
+                    label="Github personal access token">
+                <template v-slot:append>
+                    <v-btn color="primary" @click="saveToken">Save</v-btn>
+                </template>
+            </v-text-field>
+        </v-app-bar>
+        <v-navigation-drawer
+                v-model="drawer"
+                app
+                clipped
+                color="grey lighten-4">
+            <v-list dense class="grey lighten-4">
+                <template v-for="gist in gists">
+                    <v-list-item link :key="gist.id">
+                        <v-list-item-content @click="show(gist)">
+                            <v-list-item-title class="grey--text">
+                                {{ gist.name }}
+                            </v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                </template>
+            </v-list>
+        </v-navigation-drawer>
+        <v-content>
+            {{ sourceCode}}
+        </v-content>
+    </v-app>
 </template>
 
 <script>
@@ -31,6 +45,7 @@
   export default {
     data() {
       return {
+        drawer: true,
         token: '',
         sourceCode: 'Hello World',
         apolloClient: null,
@@ -42,7 +57,7 @@
       this.apolloClient = await createApolloClient({
         getToken: () => this.token
       });
-      if(this.token !== ''){
+      if (this.token !== '') {
         return this.load();
       }
     },
@@ -50,7 +65,7 @@
       show(gist) {
         this.sourceCode = gist.text;
       },
-      async load(){
+      async load() {
         const {data} = await this.apolloClient.query({query});
         this.gists = data.viewer.gists.edges.map(({node}) => ({
           id: node.name,
@@ -60,6 +75,7 @@
       },
       saveToken() {
         localStorage.setItem("token", this.token);
+        this.load();
       }
     },
   }
@@ -91,7 +107,6 @@
 
     .box {
         background-color: transparent;
-        color: #fff;
         border-radius: 5px;
         padding: 20px;
         font-size: 150%;
