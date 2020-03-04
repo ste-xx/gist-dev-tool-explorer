@@ -16,11 +16,24 @@
             </v-text-field>
         </v-app-bar>
         <v-navigation-drawer
+                ref="drawer"
                 v-model="drawer"
                 app
                 clipped
+                :width="drawerWidth"
                 color="grey lighten-4">
             <v-list dense class="grey lighten-4">
+                <v-list-item link>
+                    <v-list-item-action>
+                        <v-icon>fa-sync</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content @click="load">
+                        <v-list-item-title class="grey--text">
+                            Refresh
+                        </v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+                <v-divider/>
                 <template v-for="gist in gists">
                     <v-list-item link :key="gist.id">
                         <v-list-item-content @click="show(gist)">
@@ -33,7 +46,19 @@
             </v-list>
         </v-navigation-drawer>
         <v-content>
-            {{ sourceCode}}
+            <v-overlay :value="isLoading">
+                <v-progress-circular indeterminate size="64"></v-progress-circular>
+            </v-overlay>
+            <v-banner single-line sticky>
+                <template v-slot:actions>
+                    <v-btn outlined class="grey--text">
+                        <v-icon>fa-paste</v-icon>
+                    </v-btn>
+                </template>
+            </v-banner>
+            <div class="code mt-3 ml-3 mr-3 mb-3">
+                {{ sourceCode}}
+            </div>
         </v-content>
     </v-app>
 </template>
@@ -45,7 +70,9 @@
   export default {
     data() {
       return {
+        isLoading: false,
         drawer: true,
+        drawerWidth: 300,
         token: '',
         sourceCode: 'Hello World',
         apolloClient: null,
@@ -53,6 +80,8 @@
       }
     },
     async mounted() {
+      this.setBorderWidth();
+      this.setEvents();
       this.token = localStorage.getItem("token") || '';
       this.apolloClient = await createApolloClient({
         getToken: () => this.token
@@ -66,7 +95,15 @@
         this.sourceCode = gist.text;
       },
       async load() {
-        const {data} = await this.apolloClient.query({query});
+        this.isLoading = true;
+        const {data} = await this.apolloClient.query({query,fetchPolicy: 'network-only'})
+          .catch(e => {
+            alert(`Something went wrong? Maybe wrong accesstoken? error was: ${e.toString()}`);
+            return Promise.reject(e);
+          })
+          .finally(e => {
+          this.isLoading = false;
+        });
         this.gists = data.viewer.gists.edges.map(({node}) => ({
           id: node.name,
           name: node.files[0].name,
@@ -76,43 +113,54 @@
       saveToken() {
         localStorage.setItem("token", this.token);
         this.load();
+      },
+
+      setBorderWidth() {
+        let i = this.$refs.drawer.$el.querySelector(
+          ".v-navigation-drawer__border"
+        );
+        i.style.cursor = "ew-resize";
+      },
+      setEvents() {
+        const minSize = 3;
+        const el = this.$refs.drawer.$el;
+        const drawerBorder = el.querySelector(".v-navigation-drawer__border");
+        const vm = this;
+        const direction = el.classList.contains("v-navigation-drawer--right")
+          ? "right"
+          : "left";
+
+        function resize(e) {
+          document.body.style.cursor = "ew-resize";
+          let f =
+            direction === "right"
+              ? document.body.scrollWidth - e.clientX
+              : e.clientX;
+          el.style.width = f + "px";
+        }
+
+        drawerBorder.addEventListener(
+          "mousedown",
+          (e) => {
+            if (e.offsetX < minSize) {
+              el.style.transition = "initial";
+              document.addEventListener("mousemove", resize, false);
+            }
+          },
+          false
+        );
+
+        document.addEventListener(
+          "mouseup",
+          () => {
+            el.style.transition = "";
+            this.drawerWidth = el.style.width;
+            document.body.style.cursor = "";
+            document.removeEventListener("mousemove", resize, false);
+          },
+          false
+        );
       }
     },
   }
 </script>
-
-<style>
-    .sidebar {
-        grid-area: sidebar;
-    }
-
-    .content {
-        grid-area: content;
-    }
-
-    .header {
-        grid-area: header;
-    }
-
-
-    .wrapper {
-        display: grid;
-        grid-gap: 10px;
-        width: 100%;
-        grid-template-columns: 120px auto 120px;
-        grid-template-areas: "....... header  header" "sidebar content content";
-        background-color: transparent;
-        color: #444;
-    }
-
-    .box {
-        background-color: transparent;
-        border-radius: 5px;
-        padding: 20px;
-        font-size: 150%;
-    }
-
-    .header {
-        background-color: transparent;
-    }
-</style>
