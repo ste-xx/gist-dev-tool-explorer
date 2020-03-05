@@ -62,6 +62,9 @@
             <div class="code mt-3 ml-3 mr-3 mb-3">
                 {{ sourceCode}}
             </div>
+            <v-snackbar color="primary" v-model="copySnackbar" :timeout="timeout">
+               Code copied!
+            </v-snackbar>
         </v-content>
     </v-app>
 </template>
@@ -73,6 +76,7 @@
   export default {
     data() {
       return {
+        copySnackbar: false,
         isLoginError: false,
         loginError: '',
         isLoading: false,
@@ -123,6 +127,7 @@
       },
       copy(){
         navigator.clipboard.writeText(this.sourceCode)
+        this.copySnackbar = true;
       },
 
       setBorderWidth() {
