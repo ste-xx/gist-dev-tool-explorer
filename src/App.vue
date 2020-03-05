@@ -25,7 +25,7 @@
             <v-list dense class="grey lighten-4">
                 <v-list-item link>
                     <v-list-item-action>
-                        <v-icon>fa-sync</v-icon>
+                        <v-icon x-small class="grey--text">fa-sync</v-icon>
                     </v-list-item-action>
                     <v-list-item-content @click="load">
                         <v-list-item-title class="grey--text">
@@ -33,7 +33,7 @@
                         </v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-divider/>
+                <v-divider color="grey"/>
                 <template v-for="gist in gists">
                     <v-list-item link :key="gist.id">
                         <v-list-item-content @click="show(gist)">
@@ -46,12 +46,15 @@
             </v-list>
         </v-navigation-drawer>
         <v-content>
+            <v-alert v-if="isLoginError" type="error">
+               {{ loginError }}
+            </v-alert>
             <v-overlay :value="isLoading">
                 <v-progress-circular indeterminate size="64"></v-progress-circular>
             </v-overlay>
             <v-banner single-line sticky>
                 <template v-slot:actions>
-                    <v-btn outlined class="grey--text">
+                    <v-btn outlined class="grey--text" @click="copy">
                         <v-icon>fa-paste</v-icon>
                     </v-btn>
                 </template>
@@ -70,6 +73,8 @@
   export default {
     data() {
       return {
+        isLoginError: false,
+        loginError: '',
         isLoading: false,
         drawer: true,
         drawerWidth: 300,
@@ -98,12 +103,14 @@
         this.isLoading = true;
         const {data} = await this.apolloClient.query({query,fetchPolicy: 'network-only'})
           .catch(e => {
-            alert(`Something went wrong? Maybe wrong accesstoken? error was: ${e.toString()}`);
+            this.isLoginError = true;
+            this.loginError=`Something went wrong? Maybe wrong accesstoken? error was: ${e.toString()}`;
             return Promise.reject(e);
           })
           .finally(e => {
           this.isLoading = false;
         });
+        this.isLoginError = false;
         this.gists = data.viewer.gists.edges.map(({node}) => ({
           id: node.name,
           name: node.files[0].name,
@@ -113,6 +120,9 @@
       saveToken() {
         localStorage.setItem("token", this.token);
         this.load();
+      },
+      copy(){
+        navigator.clipboard.writeText(this.sourceCode)
       },
 
       setBorderWidth() {

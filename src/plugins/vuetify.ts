@@ -7,6 +7,9 @@ import 'vuetify/dist/vuetify.min.css'
 Vue.use(Vuetify);
 
 const opts = {
+  theme: {
+    dark: window.matchMedia('(prefers-color-scheme: dark)').matches
+  },
   icons: {
     iconfont: 'fa'
   }
