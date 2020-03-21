@@ -47,9 +47,9 @@
         </v-navigation-drawer>
         <v-content>
             <v-alert v-if="isLoginError" type="error">
-               {{ loginError }}
+                {{ loginError }}
             </v-alert>
-            <v-overlay :value="isLoading">
+            <v-overlay :value="isLoading" style="height: 100%">
                 <v-progress-circular indeterminate size="64"></v-progress-circular>
             </v-overlay>
             <v-banner single-line sticky>
@@ -57,13 +57,17 @@
                     <v-btn outlined class="grey--text" @click="copy">
                         <v-icon>fa-paste</v-icon>
                     </v-btn>
+                    <v-btn outlined class="grey--text" @click="edit">
+                        <v-icon>fa-edit</v-icon>
+                    </v-btn>
                 </template>
             </v-banner>
-            <div class="code mt-3 ml-3 mr-3 mb-3">
+            <div ref="sourceCode" class="code mt-3 ml-3 mr-3 mb-3" style="height: calc(100% - 80px)"
+                 :contenteditable="editMode">
                 {{ sourceCode}}
             </div>
             <v-snackbar color="primary" v-model="copySnackbar" :timeout="timeout">
-               Code copied!
+                Code copied!
             </v-snackbar>
         </v-content>
     </v-app>
@@ -81,6 +85,7 @@
         loginError: '',
         isLoading: false,
         drawer: true,
+        editMode: false,
         drawerWidth: 300,
         token: '',
         sourceCode: 'Hello World',
@@ -101,19 +106,20 @@
     },
     methods: {
       show(gist) {
+        this.editMode = false;
         this.sourceCode = gist.text;
       },
       async load() {
         this.isLoading = true;
-        const {data} = await this.apolloClient.query({query,fetchPolicy: 'network-only'})
+        const {data} = await this.apolloClient.query({query, fetchPolicy: 'network-only'})
           .catch(e => {
             this.isLoginError = true;
-            this.loginError=`Something went wrong? Maybe wrong accesstoken? error was: ${e.toString()}`;
+            this.loginError = `Something went wrong? Maybe wrong accesstoken? error was: ${e.toString()}`;
             return Promise.reject(e);
           })
           .finally(e => {
-          this.isLoading = false;
-        });
+            this.isLoading = false;
+          });
         this.isLoginError = false;
         this.gists = data.viewer.gists.edges.map(({node}) => ({
           id: node.name,
@@ -125,9 +131,14 @@
         localStorage.setItem("token", this.token);
         this.load();
       },
-      copy(){
+      copy() {
         navigator.clipboard.writeText(this.sourceCode)
         this.copySnackbar = true;
+      },
+
+      edit() {
+        this.editMode = true;
+        this.$nextTick(() => this.$refs.sourceCode.focus());
       },
 
       setBorderWidth() {
