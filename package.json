@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postversion": "node sync-manifest.js"
+    "version": "node sync-manifest.js"
   },
   "keywords": [],
   "author": "",
