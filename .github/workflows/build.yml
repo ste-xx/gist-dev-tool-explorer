@@ -36,5 +36,5 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       with:
-        name: bundle.zip
+        name: gist-dev-tool-explorer-master-bundle
         path: bundle.zip
