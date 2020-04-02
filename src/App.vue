@@ -84,6 +84,9 @@
             <v-snackbar color="primary" v-model="copySnackbar">
                 Code copied!
             </v-snackbar>
+            <v-snackbar color="primary" v-model="successSnackbar">
+                Successful! Open the burger menu to see your gists.
+            </v-snackbar>
         </v-content>
     </v-app>
 </template>
@@ -97,6 +100,7 @@
         mixins: [resizeableDrawerMixin],
         data() {
             return {
+                successSnackbar: false,
                 copySnackbar: false,
                 isLoginError: false,
                 loginError: '',
@@ -134,6 +138,7 @@
                         this.isLoading = false;
                     });
                 this.isLoginError = false;
+                this.successSnackbar = true;
                 this.gists = data.viewer.gists.edges.map(({node}) => ({
                     id: node.name,
                     name: node.files[0].name,
