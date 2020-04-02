@@ -25,6 +25,7 @@
     "css-loader": "^3.4.2",
     "deepmerge": "^4.2.2",
     "fibers": "^4.0.2",
+    "file-loader": "^6.0.0",
     "sass": "^1.26.3",
     "sass-loader": "^8.0.2",
     "vue-loader": "^15.9.1",

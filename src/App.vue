@@ -6,6 +6,7 @@
             <v-spacer/>
             <v-text-field
                     v-model="token"
+                    v-on:keyup.enter="saveToken"
                     solo-inverted
                     flat
                     hide-details
@@ -14,6 +15,17 @@
                     <v-btn color="primary" @click="saveToken">Save</v-btn>
                 </template>
             </v-text-field>
+
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" text> <v-icon v-on="on">fa-question-circle</v-icon></v-btn>
+                </template>
+                <div>Gist-Explorer needs your github access token to query gists at github.</div>
+                <div>(Settings -> Developer Settings -> Personal access token -> create new token)</div>
+                <div style="color:orange">To see your Secret gist, the permission "gist" must be set.</div>
+                <div>If this is not set, only your public gist can be queried.</div>
+                <div>Copy the generated token into the textfield and hit save.</div>
+            </v-tooltip>
         </v-app-bar>
         <v-navigation-drawer
                 ref="drawer"
@@ -82,67 +94,67 @@
     import resizeableDrawerMixin from "./resizeableDrawerMixin.js";
 
     export default {
-    mixins: [resizeableDrawerMixin],
-    data() {
-      return {
-        copySnackbar: false,
-        isLoginError: false,
-        loginError: '',
-        isLoading: false,
-        editMode: false,
-        token: '',
-        sourceCode: 'Hello World',
-        apolloClient: null,
-        gists: [],
-      }
-    },
-    async mounted() {
-      this.token = localStorage.getItem("token") || '';
-      this.apolloClient = await createApolloClient({
-        getToken: () => this.token
-      });
-      if (this.token !== '') {
-        return this.load();
-      }
-    },
-    methods: {
-      show(gist) {
-        this.editMode = false;
-        this.sourceCode = gist.text;
-      },
-      async load() {
-        this.isLoading = true;
-        const {data} = await this.apolloClient.query({query, fetchPolicy: 'network-only'})
-          .catch(e => {
-            this.isLoginError = true;
-            this.loginError = `Something went wrong? Maybe wrong accesstoken? error was: ${e.toString()}`;
-            return Promise.reject(e);
-          })
-          .finally(e => {
-            this.isLoading = false;
-          });
-        this.isLoginError = false;
-        this.gists = data.viewer.gists.edges.map(({node}) => ({
-          id: node.name,
-          name: node.files[0].name,
-          text: node.files[0].text
-        }));
-      },
-      saveToken() {
-        localStorage.setItem("token", this.token);
-        this.load();
-      },
-      copy() {
-        navigator.clipboard.writeText(this.sourceCode)
-        this.copySnackbar = true;
-      },
+        mixins: [resizeableDrawerMixin],
+        data() {
+            return {
+                copySnackbar: false,
+                isLoginError: false,
+                loginError: '',
+                isLoading: false,
+                editMode: false,
+                token: '',
+                sourceCode: 'Hello World',
+                apolloClient: null,
+                gists: [],
+            }
+        },
+        async mounted() {
+            this.token = localStorage.getItem("token") || '';
+            this.apolloClient = await createApolloClient({
+                getToken: () => this.token
+            });
+            if (this.token !== '') {
+                return this.load();
+            }
+        },
+        methods: {
+            show(gist) {
+                this.editMode = false;
+                this.sourceCode = gist.text;
+            },
+            async load() {
+                this.isLoading = true;
+                const {data} = await this.apolloClient.query({query, fetchPolicy: 'network-only'})
+                    .catch(e => {
+                        this.isLoginError = true;
+                        this.loginError = `Something went wrong? Maybe wrong accesstoken? error was: ${e.toString()}`;
+                        return Promise.reject(e);
+                    })
+                    .finally(e => {
+                        this.isLoading = false;
+                    });
+                this.isLoginError = false;
+                this.gists = data.viewer.gists.edges.map(({node}) => ({
+                    id: node.name,
+                    name: node.files[0].name,
+                    text: node.files[0].text
+                }));
+            },
+            saveToken() {
+                localStorage.setItem("token", this.token);
+                this.load();
+            },
+            copy() {
+                navigator.clipboard.writeText(this.sourceCode)
+                this.copySnackbar = true;
+            },
 
-      edit() {
-        this.editMode = true;
-        this.$nextTick(() => this.$refs.sourceCode.focus());
-      }
-    },
-  }
+            edit() {
+                this.editMode = true;
+                this.$nextTick(() => this.$refs.sourceCode.focus());
+            }
+        },
+    }
 </script>
 <style>
     :root {
