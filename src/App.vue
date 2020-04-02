@@ -138,7 +138,7 @@
                     id: node.name,
                     name: node.files[0].name,
                     text: node.files[0].text
-                }));
+                })).sort((o1, o2) => o1.name.localeCompare(o2.name));
             },
             saveToken() {
                 localStorage.setItem("token", this.token);
