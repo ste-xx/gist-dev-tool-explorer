@@ -62,11 +62,14 @@
                     </v-btn>
                 </template>
             </v-banner>
-            <div ref="sourceCode" class="code mt-3 ml-3 mr-3 mb-3" style="height: calc(100% - 80px)"
-                 :contenteditable="editMode">
-                {{ sourceCode}}
+            <div style="display: flex; height: calc(100% - 80px)">
+                <div style="width:var(--drawer-width);"/>
+                <div ref="sourceCode" class="code mt-3 ml-3 mr-3 mb-3"
+                     :contenteditable="editMode">
+                    {{ sourceCode}}
+                </div>
             </div>
-            <v-snackbar color="primary" v-model="copySnackbar" :timeout="timeout">
+            <v-snackbar color="primary" v-model="copySnackbar">
                 Code copied!
             </v-snackbar>
         </v-content>
@@ -74,19 +77,19 @@
 </template>
 
 <script>
-  import {createApolloClient} from "./createApolloClient";
-  import {query} from "./query";
+    import {createApolloClient} from "./createApolloClient";
+    import {query} from "./query";
+    import resizeableDrawerMixin from "./resizeableDrawerMixin.js";
 
-  export default {
+    export default {
+    mixins: [resizeableDrawerMixin],
     data() {
       return {
         copySnackbar: false,
         isLoginError: false,
         loginError: '',
         isLoading: false,
-        drawer: true,
         editMode: false,
-        drawerWidth: 300,
         token: '',
         sourceCode: 'Hello World',
         apolloClient: null,
@@ -94,8 +97,6 @@
       }
     },
     async mounted() {
-      this.setBorderWidth();
-      this.setEvents();
       this.token = localStorage.getItem("token") || '';
       this.apolloClient = await createApolloClient({
         getToken: () => this.token
@@ -139,54 +140,12 @@
       edit() {
         this.editMode = true;
         this.$nextTick(() => this.$refs.sourceCode.focus());
-      },
-
-      setBorderWidth() {
-        let i = this.$refs.drawer.$el.querySelector(
-          ".v-navigation-drawer__border"
-        );
-        i.style.cursor = "ew-resize";
-      },
-      setEvents() {
-        const minSize = 3;
-        const el = this.$refs.drawer.$el;
-        const drawerBorder = el.querySelector(".v-navigation-drawer__border");
-        const vm = this;
-        const direction = el.classList.contains("v-navigation-drawer--right")
-          ? "right"
-          : "left";
-
-        function resize(e) {
-          document.body.style.cursor = "ew-resize";
-          let f =
-            direction === "right"
-              ? document.body.scrollWidth - e.clientX
-              : e.clientX;
-          el.style.width = f + "px";
-        }
-
-        drawerBorder.addEventListener(
-          "mousedown",
-          (e) => {
-            if (e.offsetX < minSize) {
-              el.style.transition = "initial";
-              document.addEventListener("mousemove", resize, false);
-            }
-          },
-          false
-        );
-
-        document.addEventListener(
-          "mouseup",
-          () => {
-            el.style.transition = "";
-            this.drawerWidth = el.style.width;
-            document.body.style.cursor = "";
-            document.removeEventListener("mousemove", resize, false);
-          },
-          false
-        );
       }
     },
   }
 </script>
+<style>
+    :root {
+        --drawer-width: 300px;
+    }
+</style>

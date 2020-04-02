@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "watch-dev": "webpack --progress --watch --mode=\"development\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "version": "node sync-manifest.js && git add manifest.json"
   },
