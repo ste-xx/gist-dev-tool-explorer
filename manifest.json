@@ -6,7 +6,7 @@
     "48": "manifest-res/icon48.png",
     "128": "manifest-res/icon128.png"
   },
-  "description": "Get your gists and execute them on the current page",
+  "description": "An additional DevTool panel for your gists.",
   "manifest_version": 2,
   "devtools_page": "devtools.html"
 }
