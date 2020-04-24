@@ -76,10 +76,10 @@
             </v-banner>
             <div style="display: flex; height: calc(100% - 80px)">
                 <div style="width:var(--drawer-width);"/>
-                <div ref="sourceCode" class="code mt-3 ml-3 mr-3 mb-3"
+                <pre ref="sourceCode"  style="display: block" class="code mt-3 ml-3 mr-3 mb-3"
                      :contenteditable="editMode">
-                    {{ sourceCode}}
-                </div>
+                    {{ sourceCode }}
+                </pre>
             </div>
             <v-snackbar color="primary" v-model="copySnackbar">
                 Code copied!
@@ -124,7 +124,7 @@
         methods: {
             show(gist) {
                 this.editMode = false;
-                this.sourceCode = gist.text;
+                this.sourceCode = "\n"+gist.text.trim();
             },
             async load() {
                 this.isLoading = true;
