@@ -8,5 +8,8 @@
   },
   "description": "An additional DevTool panel for your gists.",
   "manifest_version": 2,
-  "devtools_page": "devtools.html"
+  "devtools_page": "devtools.html",
+  "permissions": [
+    "clipboardWrite"
+  ]
 }

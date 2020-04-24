@@ -150,10 +150,27 @@
                 this.load();
             },
             copy() {
-                navigator.clipboard.writeText(this.sourceCode)
-                this.copySnackbar = true;
+              this.fallbackCopyTextToClipboard(this.sourceCode)
+             // await navigator.clipboard.writeText(this.sourceCode)
+              this.copySnackbar = true;
             },
+            fallbackCopyTextToClipboard(text) {
+              const textArea = document.createElement("textarea");
+              textArea.value = text;
 
+              // Avoid scrolling to bottom
+              textArea.style.top = "0";
+              textArea.style.left = "0";
+              textArea.style.position = "fixed";
+
+              document.body.appendChild(textArea);
+              textArea.focus();
+              textArea.select();
+              try {
+                document.execCommand('copy');
+              } catch (err) {}
+              document.body.removeChild(textArea);
+            },
             edit() {
                 this.editMode = true;
                 this.$nextTick(() => this.$refs.sourceCode.focus());
